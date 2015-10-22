@@ -50,7 +50,7 @@ public class MusicManager : MonoBehaviour {
 		float[] spectrumData = AudioListener.GetSpectrumData (sampleSlices, 0, FFTWindow.Blackman);
 		for (int i = 1; i < spectrumData.Length-1; i++) {
 			// change position according to spectrum data
-			spectrumBlocks[i].transform.position = Vector3.Lerp (spectrumBlocks[i].transform.position, new Vector3 (spectrumBlocks[i].transform.position.x, 1f + 0.04f * i + Mathf.Log (spectrumData[i]), spectrumBlocks[i].transform.position.z), 10f * Time.deltaTime);
+			spectrumBlocks[i].transform.position = Vector3.Lerp (spectrumBlocks[i].transform.position, new Vector3 (spectrumBlocks[i].transform.position.x, 1f + 0.04f * i + Mathf.Log (spectrumData[i]*i), spectrumBlocks[i].transform.position.z), 8f * Time.deltaTime);
 			// change y-scale according to spectrum data
 			//spectrumBlocks[i].transform.localScale = Vector3.Lerp (spectrumBlocks[i].transform.localScale, new Vector3 (spectrumBlocks[i].transform.localScale.x, 0.2f + 3f*spectrumData[i]*i*Mathf.Log(spectrumData[i]),spectrumBlocks[i].transform.localScale.z), 10f * Time.deltaTime);
 		}

@@ -1,21 +1,31 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class BallPlay : MonoBehaviour {
 
 	public string spectrumBlockTag;		// tag for audio spectrum blocks checked on collision
 
-	// for adding random spin on impact
-	public float randomSideForce;
+	// item placement on input
+	public int numberOfBumpers;			// total bumpers the player has
+	public static int bumpersDeployed;	// count of bumpers in the world
+	public GameObject bumper;			// ball bumper that stays in world for limited time
 
-	void AddRandomSideSpin () {
-		this.GetComponent<Rigidbody2D>().AddForce (new Vector2 (Random.Range (-5f,5f), 0f));
-	}
+	// UI elements
+	public Text itemsText;
+	
 
 	void Update () {
+		// update UI text
+		itemsText.text = ("Bumpers Left: "+(numberOfBumpers-bumpersDeployed));
+
 		// ensure ball always stays along 2D z collision plane
 		if (Mathf.Abs(this.transform.position.z) > 1f) {
 			transform.Translate (new Vector3 (this.transform.position.x, this.transform.position.y, 0f));
+		}
+
+		if (Input.GetButtonDown ("Fire1") && bumpersDeployed < numberOfBumpers) {
+			Instantiate (bumper, Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z)), Quaternion.identity);
 		}
 	}
 
@@ -23,7 +33,13 @@ public class BallPlay : MonoBehaviour {
 		// possibly add sidespin if collide with the spectrum
 		if (collision.collider.gameObject.tag == spectrumBlockTag) {
 			AddRandomSideSpin ();
-
 		}
 	}
+
+	// nudge ball right or left on impact
+	void AddRandomSideSpin () {
+		this.GetComponent<Rigidbody2D>().AddForce (new Vector2 (Random.Range (-4f, 4f), 0f));
+	}
+
+
 }
