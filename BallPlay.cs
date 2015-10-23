@@ -24,6 +24,8 @@ public class BallPlay : MonoBehaviour {
 			transform.Translate (new Vector3 (this.transform.position.x, this.transform.position.y, 0f));
 		}
 
+		// add a bumper to world if clicked on free space
+		// RAYCAST check for player, enemies, and other barriers to placement
 		if (Input.GetButtonDown ("Fire1") && bumpersDeployed < numberOfBumpers) {
 			Instantiate (bumper, Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z)), Quaternion.identity);
 		}
@@ -31,9 +33,9 @@ public class BallPlay : MonoBehaviour {
 
 	void OnCollisionEnter2D (Collision2D collision) {
 		// possibly add sidespin if collide with the spectrum
-		if (collision.collider.gameObject.tag == spectrumBlockTag) {
-			AddRandomSideSpin ();
-		}
+		//if (collision.collider.gameObject.tag == spectrumBlockTag) {
+		//	AddRandomSideSpin ();
+		//}
 	}
 
 	// nudge ball right or left on impact

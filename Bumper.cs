@@ -20,9 +20,9 @@ public class Bumper : MonoBehaviour {
 
 	IEnumerator Blink () {
 		blinking = true;
-		this.GetComponent<MeshRenderer> ().enabled = false;
+		this.GetComponent<SpriteRenderer> ().enabled = false;
 		yield return new WaitForSeconds (lifetime * 0.1f);
-		this.GetComponent<MeshRenderer> ().enabled = true;
+		this.GetComponent<SpriteRenderer> ().enabled = true;
 		blinking = false;
 	}
 

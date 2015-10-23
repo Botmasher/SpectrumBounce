@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CameraBehavior : MonoBehaviour {
+public class GameManager : MonoBehaviour {
 
 	public GameObject ball;			// reference to bouncing ball
 	private CameraCrew director;	// crew instance for directing camera and lighting
@@ -36,4 +36,13 @@ public class CameraBehavior : MonoBehaviour {
 	void Update () {
 		//director.TrackObject (ball);
 	}
+
+	// called when player dies
+	public static void OnPlayerDead (GameObject killer, GameObject player) {
+		Debug.Log ("You died!");
+		Destroy (killer.gameObject);
+		Destroy (player.gameObject);
+		Application.LoadLevel (Application.loadedLevel);
+	}
+
 }
