@@ -20,6 +20,7 @@ public class MusicManager : MonoBehaviour {
 
 	// spawn enemies at certain song times
 	public GameObject enemy;
+	private bool enemySpawned=false;
 
 
 	void Start () {
@@ -48,7 +49,7 @@ public class MusicManager : MonoBehaviour {
 	void Update () {
 
 		// decide if time for enemy to spawn
-		if (GetComponent<AudioSource> ().clip.length - GetComponent<AudioSource> ().timeSamples % 5 == 0) {
+		if (!enemySpawned) {
 			StartCoroutine (SpawnEnemy ());
 		}
 
@@ -73,7 +74,14 @@ public class MusicManager : MonoBehaviour {
 	}
 
 	IEnumerator SpawnEnemy () {
-		Instantiate (enemy, Vector3.zero, Quaternion.identity);
+		enemySpawned = true;
+		if (GetComponent<AudioSource> ().clip.length - GetComponent<AudioSource> ().timeSamples > 0f) {
+			Debug.Log (GetComponent<AudioSource> ().timeSamples);
+		}
+		yield return new WaitForSeconds (Random.Range (5f, 10f));
+		// spawn enemy just offscreen (x) and at player's height (y)
+		Instantiate (enemy, new Vector3 (Camera.main.ViewportToWorldPoint(Vector3.one).x, GameObject.FindGameObjectWithTag("Player").transform.position.y, 0f), Quaternion.identity);
+		enemySpawned = false;
 	}
 
 }

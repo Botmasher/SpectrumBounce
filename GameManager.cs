@@ -40,9 +40,8 @@ public class GameManager : MonoBehaviour {
 	// called when player dies
 	public static void OnPlayerDead (GameObject killer, GameObject player) {
 		Debug.Log ("You died!");
-		Destroy (killer.gameObject);
 		Destroy (player.gameObject);
-		Application.LoadLevel (Application.loadedLevel);
+		Application.LoadLevel ("scene-00");
 	}
 
 }
