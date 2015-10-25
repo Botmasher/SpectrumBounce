@@ -75,11 +75,8 @@ public class MusicManager : MonoBehaviour {
 
 	IEnumerator SpawnEnemy () {
 		enemySpawned = true;
-		if (GetComponent<AudioSource> ().clip.length - GetComponent<AudioSource> ().timeSamples > 0f) {
-			Debug.Log (GetComponent<AudioSource> ().timeSamples);
-		}
 		yield return new WaitForSeconds (Random.Range (5f, 10f));
-		// spawn enemy just offscreen (x) and at player's height (y)
+		// spawn enemy just offscreen x and at a y that can attack player
 		Instantiate (enemy, new Vector3 (Camera.main.ViewportToWorldPoint(Vector3.one).x, Random.Range(-0.5f,6.0f), 0f), Quaternion.identity);
 		enemySpawned = false;
 	}

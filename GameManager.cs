@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour {
 
 	// objects referenced in script
 	public GameObject ball;			// main player bouncing ball
+	public GameObject explosion;	// particle system to instantiate on hits
 	private CameraCrew director;	// crew instance for directing camera and lighting
 
 	// gamewide control flow
@@ -52,17 +53,21 @@ public class GameManager : MonoBehaviour {
 	void Update () {
 		//director.TrackObject (ball);
 
+		// do general gameover stuff (also see OnPlayerDead)
 		if (gameOver) {
 			director.mainMusic.PitchDown();
 			screenFader.CrossFadeAlpha (1f, 2f, false);
+			centerText.text = "You Are Dead";
 			centerText.CrossFadeAlpha (1f, 2f, false);
 		}
+
 	}
 
 	// called when player dies
-	public static IEnumerator OnPlayerDead (GameObject killer, GameObject player) {
+	public IEnumerator OnPlayerDead (GameObject killer, GameObject player) {
 		// tell update to perform gameover actions over time
 		gameOver = true;
+		Instantiate (explosion, player.transform.position, Quaternion.identity);
 		Destroy (player.gameObject);
 		// wait and reset level (fade scene and music actions happen in update)
 		yield return new WaitForSeconds (4f);
