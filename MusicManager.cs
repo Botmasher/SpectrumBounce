@@ -11,7 +11,10 @@ public class MusicManager : MonoBehaviour {
 	public float spectrumXOrigin;					// where to start laying blocks, from left to right along world x-axis
 
 	// for listening to, behaving with and FXing music
-	public AudioMixer master;						// main mixer in scene
+	public AudioMixer mixer;						// main mixer in scene
+	public AudioMixerGroup master;					// audio channels
+	public AudioMixerGroup track1;
+	public AudioMixerGroup track2;
 	[Range (64, 8192)] public int sampleSlices;		// break spectrum data into n samples (spectrumdata allows min=64,max=8192)
 
 	// music to play through mixer
@@ -84,8 +87,8 @@ public class MusicManager : MonoBehaviour {
 	// music slowly goes to pitch 0 - the sound of failure
 	public void PitchDown () {
 		float thisPitch;
-		master.GetFloat ("MasterPitch", out thisPitch);
-		master.SetFloat ("MasterPitch", thisPitch - (0.5f*Time.deltaTime));
+		mixer.GetFloat ("MasterPitch", out thisPitch);
+		mixer.SetFloat ("MasterPitch", thisPitch - (0.5f*Time.deltaTime));
 	}
 
 }

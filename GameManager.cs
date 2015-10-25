@@ -55,7 +55,9 @@ public class GameManager : MonoBehaviour {
 
 		// do general gameover stuff (also see OnPlayerDead)
 		if (gameOver) {
+			// change music mood to disappointment
 			director.mainMusic.PitchDown();
+			// gameover text screen fade
 			screenFader.CrossFadeAlpha (1f, 2f, false);
 			centerText.text = "You Are Dead";
 			centerText.CrossFadeAlpha (1f, 2f, false);
@@ -72,6 +74,7 @@ public class GameManager : MonoBehaviour {
 		// wait and reset level (fade scene and music actions happen in update)
 		yield return new WaitForSeconds (4f);
 		Application.LoadLevel (Application.loadedLevel);
+
 	}
 
 }

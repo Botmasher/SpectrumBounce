@@ -7,9 +7,15 @@ public class Enemy : MonoBehaviour {
 	public float speed;
 	private bool movingRight;
 
+	public AudioClip birdScreech;
+
 	void Start () {
 		// flip coin for facing left right
 		movingRight = Mathf.Round (Random.Range (0f,1f)) == 1 ? true : false;
+
+		// play bird sound
+		GetComponent<AudioSource>().clip = birdScreech;
+		GetComponent<AudioSource>().Play();
 
 		// face the correct way and start off opposite side of screen
 		if (movingRight) {

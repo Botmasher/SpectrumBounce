@@ -6,6 +6,9 @@ public class BallPlay : MonoBehaviour {
 
 	public string spectrumBlockTag;		// tag for audio spectrum blocks checked on collision
 
+	// sfx to play
+	public AudioClip ballHit;
+
 	// item placement on input
 	public int numberOfBumpers;			// total bumpers the player has
 	public static int bumpersDeployed;	// count of bumpers in the world
@@ -32,6 +35,9 @@ public class BallPlay : MonoBehaviour {
 	}
 
 	void OnCollisionEnter2D (Collision2D collision) {
+		// play a hit sound
+		GetComponent<AudioSource>().clip = ballHit;
+		GetComponent<AudioSource>().Play ();
 		// possibly add sidespin if collide with the spectrum
 		//if (collision.collider.gameObject.tag == spectrumBlockTag) {
 		//	AddRandomSideSpin ();
