@@ -12,10 +12,10 @@ public class MusicManager : MonoBehaviour {
 
 	// for listening to, behaving with and FXing music
 	public AudioMixer mixer;						// main mixer in scene
-	public AudioMixerGroup master;					// audio channels
-	public AudioMixerGroup track1;
-	public AudioMixerGroup track2;
+	public AudioMixerGroup master;					// all channels
+	public AudioMixerGroup music;					// music channels
 	[Range (64, 8192)] public int sampleSlices;		// break spectrum data into n samples (spectrumdata allows min=64,max=8192)
+	private float[] currentSpectrumData;			// preallocated array to hold spectrum data for current frame
 
 	// music to play through mixer
 	public List<AudioClip> playlist = new List<AudioClip>();
@@ -25,9 +25,12 @@ public class MusicManager : MonoBehaviour {
 	void Start () {
 		// ensure samples is an even integer between 64 and 8192 as expected by spectrumdata
 		sampleSlices = Mathf.Clamp (sampleSlices, 64, 8192);
-		//if (sampleSlices%2 == 1) {
-		//	sampleSlices += 1;
-		//}
+		if (sampleSlices%2 == 1) {
+			sampleSlices += 1;
+		}
+
+		// initialize spectrumdata array to how many samples we'll take each frame
+		currentSpectrumData = new float[sampleSlices];
 
 		// lineup blocks in spectrum from origin until placing total number of sample slices
 		for (int i = 0; i < sampleSlices; i++) {
@@ -46,9 +49,6 @@ public class MusicManager : MonoBehaviour {
 	
 
 	void Update () {
-
-
-
 		// call function to adjust spectrum this frame
 		MoveSpectrumWithMusic ();
 
@@ -60,20 +60,20 @@ public class MusicManager : MonoBehaviour {
 	}
 
 	void MoveSpectrumWithMusic () {
-		float[] spectrumData = AudioListener.GetSpectrumData (sampleSlices, 0, FFTWindow.Blackman);
-		for (int i = 1; i < spectrumData.Length-1; i++) {
+		currentSpectrumData = GetComponent<AudioSource> ().GetSpectrumData (sampleSlices, 0, FFTWindow.Blackman);
+		for (int i = 1; i < currentSpectrumData.Length-1; i++) {
 			// change position according to spectrum data
-			//spectrumBlocks[i].transform.position = Vector3.Lerp (spectrumBlocks[i].transform.position, new Vector3 (spectrumBlocks[i].transform.position.x, 1f + 0.04f * i + Mathf.Log (spectrumData[i]*i), spectrumBlocks[i].transform.position.z), 8f * Time.deltaTime);
+			//spectrumBlocks[i].transform.position = Vector3.Lerp (spectrumBlocks[i].transform.position, new Vector3 (spectrumBlocks[i].transform.position.x, 1f + 0.04f * i + Mathf.Log (currentSpectrumData[i]*i), spectrumBlocks[i].transform.position.z), 8f * Time.deltaTime);
 			// change y-scale according to spectrum data
-			spectrumBlocks[i].transform.localScale = Vector3.Lerp (spectrumBlocks[i].transform.localScale, new Vector3 (spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*spectrumData[i]*(i+i)*Mathf.Log(spectrumData[i]*spectrumData[i]*i*i),spectrumBlocks[i].transform.localScale.z), 8f * Time.deltaTime);
+			spectrumBlocks[i].transform.localScale = Vector3.Lerp (spectrumBlocks[i].transform.localScale, new Vector3 (spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*currentSpectrumData[i]*(i+i)*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i),spectrumBlocks[i].transform.localScale.z), 8f * Time.deltaTime);
 		}
 	}
 
 	// music slowly goes to pitch 0 - the sound of failure
 	public void PitchDown () {
 		float thisPitch;
-		mixer.GetFloat ("MasterPitch", out thisPitch);
-		mixer.SetFloat ("MasterPitch", thisPitch - (0.5f*Time.deltaTime));
+		mixer.GetFloat ("MusicPitch", out thisPitch);
+		mixer.SetFloat ("MusicPitch", thisPitch - (0.5f*Time.deltaTime));
 	}
 
 }
