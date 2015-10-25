@@ -6,11 +6,13 @@ public class GameManager : MonoBehaviour {
 
 	// objects referenced in script
 	public GameObject ball;			// main player bouncing ball
+	public GameObject enemy;		// main grunt enemy
 	public GameObject explosion;	// particle system to instantiate on hits
 	private CameraCrew director;	// crew instance for directing camera and lighting
 
 	// gamewide control flow
 	public static bool gameOver;
+	private bool enemySpawned;
 
 	// UI updates
 	public Image screenFader;
@@ -44,6 +46,7 @@ public class GameManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		gameOver = false;
+		enemySpawned = false;
 		director = new CameraCrew ();
 
 		screenFader.CrossFadeAlpha (0f, 1f, false);
@@ -63,6 +66,20 @@ public class GameManager : MonoBehaviour {
 			centerText.CrossFadeAlpha (1f, 2f, false);
 		}
 
+		// decide if time for enemy to spawn
+		if (!enemySpawned) {
+			StartCoroutine (SpawnEnemy ());
+		}
+
+	}
+
+	// instantiate an enemy
+	IEnumerator SpawnEnemy () {
+		enemySpawned = true;
+		yield return new WaitForSeconds (Random.Range (6f, 11f));
+		// spawn enemy just offscreen x and at a y that can attack player
+		Instantiate (enemy, new Vector3 (Camera.main.ViewportToWorldPoint(Vector3.one).x, Random.Range(-0.5f,6.0f), 0f), Quaternion.identity);
+		enemySpawned = false;
 	}
 
 	// called when player dies

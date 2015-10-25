@@ -21,10 +21,6 @@ public class MusicManager : MonoBehaviour {
 	public List<AudioClip> playlist = new List<AudioClip>();
 	private AudioClip song;							// current music playing
 
-	// spawn enemies at certain song times
-	public GameObject enemy;
-	private bool enemySpawned=false;
-
 
 	void Start () {
 		// ensure samples is an even integer between 64 and 8192 as expected by spectrumdata
@@ -51,10 +47,7 @@ public class MusicManager : MonoBehaviour {
 
 	void Update () {
 
-		// decide if time for enemy to spawn
-		if (!enemySpawned) {
-			StartCoroutine (SpawnEnemy ());
-		}
+
 
 		// call function to adjust spectrum this frame
 		MoveSpectrumWithMusic ();
@@ -74,14 +67,6 @@ public class MusicManager : MonoBehaviour {
 			// change y-scale according to spectrum data
 			spectrumBlocks[i].transform.localScale = Vector3.Lerp (spectrumBlocks[i].transform.localScale, new Vector3 (spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*spectrumData[i]*(i+i)*Mathf.Log(spectrumData[i]*spectrumData[i]*i*i),spectrumBlocks[i].transform.localScale.z), 8f * Time.deltaTime);
 		}
-	}
-
-	IEnumerator SpawnEnemy () {
-		enemySpawned = true;
-		yield return new WaitForSeconds (Random.Range (5f, 10f));
-		// spawn enemy just offscreen x and at a y that can attack player
-		Instantiate (enemy, new Vector3 (Camera.main.ViewportToWorldPoint(Vector3.one).x, Random.Range(-0.5f,6.0f), 0f), Quaternion.identity);
-		enemySpawned = false;
 	}
 
 	// music slowly goes to pitch 0 - the sound of failure
