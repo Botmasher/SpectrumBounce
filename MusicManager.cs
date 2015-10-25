@@ -80,8 +80,15 @@ public class MusicManager : MonoBehaviour {
 		}
 		yield return new WaitForSeconds (Random.Range (5f, 10f));
 		// spawn enemy just offscreen (x) and at player's height (y)
-		Instantiate (enemy, new Vector3 (Camera.main.ViewportToWorldPoint(Vector3.one).x, GameObject.FindGameObjectWithTag("Player").transform.position.y, 0f), Quaternion.identity);
+		Instantiate (enemy, new Vector3 (Camera.main.ViewportToWorldPoint(Vector3.one).x, Random.Range(-0.5f,6.0f), 0f), Quaternion.identity);
 		enemySpawned = false;
+	}
+
+	// music slowly goes to pitch 0 - the sound of failure
+	public void PitchDown () {
+		float thisPitch;
+		master.GetFloat ("MasterPitch", out thisPitch);
+		master.SetFloat ("MasterPitch", thisPitch - (0.5f*Time.deltaTime));
 	}
 
 }

@@ -36,7 +36,7 @@ public class Enemy : MonoBehaviour {
 
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.gameObject.tag == "Player") {
-			GameManager.OnPlayerDead (this.gameObject, other.gameObject);
+			StartCoroutine (GameManager.OnPlayerDead (this.gameObject, other.gameObject));
 			Destroy (this.gameObject);
 		}
 	}
