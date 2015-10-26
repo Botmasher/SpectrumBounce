@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour {
 
 	// gamewide control flow
 	public static bool gameOver;
+	public RaycastHit2D hit;
 	private bool enemySpawned;
 
 	// UI updates
@@ -49,6 +50,7 @@ public class GameManager : MonoBehaviour {
 		enemySpawned = false;
 		director = new CameraCrew ();
 
+		// make UI screen invisible
 		screenFader.CrossFadeAlpha (0f, 1f, false);
 		centerText.CrossFadeAlpha (0f, 0f, true);
 	}
@@ -91,7 +93,16 @@ public class GameManager : MonoBehaviour {
 		// wait and reset level (fade scene and music actions happen in update)
 		yield return new WaitForSeconds (4f);
 		Application.LoadLevel (Application.loadedLevel);
-
 	}
 
+	// called when player wins
+	public IEnumerator YouWin () {
+		Debug.Log ("You Win!");
+		yield return null;
+	}
+
+	public RaycastHit2D ClickRaycast () {
+		hit = Physics2D.Raycast (Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+		return hit;
+	}
 }

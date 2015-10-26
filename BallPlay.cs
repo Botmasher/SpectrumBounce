@@ -28,11 +28,15 @@ public class BallPlay : MonoBehaviour {
 		}
 
 		// add a bumper to world if clicked on free space
-		// RAYCAST check for player, enemies, and other barriers to placement
+		// check for player, enemies, and other barriers to placement
 		if (Input.GetButtonDown ("Fire1") && bumpersDeployed < numberOfBumpers) {
-			Instantiate (bumper, Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z)), Quaternion.identity);
+			if (Camera.main.GetComponent<GameManager>().ClickRaycast() == null || Camera.main.GetComponent<GameManager>().ClickRaycast().collider.tag != this.gameObject.tag) {
+				Instantiate (bumper, Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z)), Quaternion.identity);
+			}
 		}
+	
 	}
+
 
 	void OnCollisionEnter2D (Collision2D collision) {
 		// play a hit sound
@@ -43,6 +47,7 @@ public class BallPlay : MonoBehaviour {
 		//	AddRandomSideSpin ();
 		//}
 	}
+
 
 	// nudge ball right or left on impact
 	void AddRandomSideSpin () {
