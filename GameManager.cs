@@ -12,7 +12,6 @@ public class GameManager : MonoBehaviour {
 
 	// gamewide control flow
 	public static bool gameOver;
-	public RaycastHit2D hit;
 	private bool enemySpawned;
 
 	// UI updates
@@ -101,8 +100,27 @@ public class GameManager : MonoBehaviour {
 		yield return null;
 	}
 
-	public RaycastHit2D ClickRaycast () {
-		hit = Physics2D.Raycast (Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-		return hit;
+	public static bool IsCloseToPlayers (Vector2 position, float sensitiviity) {
+		/*GameObject[] playersArray = GameObject.FindGameObjectsWithTag("Player");
+		for (int i=0; i<playersArray.Length; i++) {
+			// check if x and y position are too close to player - "too close" is decided by sensitivity
+			if (Mathf.Abs(playersArray[i].transform.position.x - position.x) < sensitiviity || Mathf.Abs (playersArray[i].transform.position.y - position.y) < sensitiviity) {
+				return true;
+			}
+		}*/
+		if ( Mathf.Abs (GameObject.FindGameObjectWithTag("Player").transform.position.x - position.x) < sensitiviity && Mathf.Abs (GameObject.FindGameObjectWithTag("Player").transform.position.y - position.y) < sensitiviity ) {
+			return true;
+		}
+		return false;
 	}
+
+	public static bool ClickedSpotHasObjects () {
+		RaycastHit2D hit = Physics2D.Raycast (Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+		if (hit != null && hit.collider != null) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 }
