@@ -30,7 +30,7 @@ public class BallPlay : MonoBehaviour {
 		// add a bumper to world if clicked on free space
 		// check for player, enemies, and other barriers to placement
 		if (Input.GetButtonDown ("Fire1") && bumpersDeployed < numberOfBumpers) {
-			if (GameManager.ClickedSpotHasObjects()) {
+			if (!GameManager.ThisSpotHasObjects(Camera.main.ScreenToWorldPoint(Input.mousePosition))) {
 				Instantiate (bumper, Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z)), Quaternion.identity);
 			}
 		}

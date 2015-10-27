@@ -104,12 +104,12 @@ public class GameManager : MonoBehaviour {
 	 *	Check if the current mouse position is not cluttered by collider objects
 	 *	Use this to find out if the spot you're clicking is a good place for a new object
 	 */
-	public static bool ClickedSpotHasObjects () {
-		RaycastHit2D hit = Physics2D.Raycast (Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+	public static bool ThisSpotHasObjects (Vector2 position) {
+		RaycastHit2D hit = Physics2D.Raycast (position, Vector2.zero);
 		if (hit != null && hit.collider != null) {
-			return false;
-		} else {
 			return true;
+		} else {
+			return false;
 		}
 	}
 

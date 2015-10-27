@@ -49,7 +49,7 @@ public class MusicManager : MonoBehaviour {
 		}
 
 		// load and play first song
-		song = playlist[0];
+		song = playlist[4];
 		GetComponent<AudioSource> ().clip = song;
 		GetComponent<AudioSource> ().Play ();
 		songLength = GetComponent<AudioSource> ().clip.length;
@@ -66,7 +66,7 @@ public class MusicManager : MonoBehaviour {
 		mixer.GetFloat ("MusicPitch", out songPitch);
 
 		// calculate time remaining, factoring in how the pitch/tempo fx distort the time remaining
-		songLeft = (songLength - songTimer)*songPitch >= 0f ? (songLength - songTimer) * songPitch : 0.0001f;
+		songLeft = (songLength - songTimer) / songPitch >= 0f ? (songLength - songTimer) / songPitch : 0.0001f;
 
 		// Update UI text with formatted song timer countdown
 		string newText = System.TimeSpan.FromSeconds(songLeft).ToString();
@@ -109,10 +109,10 @@ public class MusicManager : MonoBehaviour {
 			if (GetComponent<AudioSource>().isPlaying) {
 
 				// change position according to spectrum data
-				spectrumBlocks[i].transform.position = Vector3.Lerp (spectrumBlocks[i].transform.position, new Vector3 (spectrumBlocks[i].transform.position.x, 1f + 0.04f * i + Mathf.Log (currentSpectrumData[i]*i), spectrumBlocks[i].transform.position.z), 8f * Time.deltaTime);
+				//spectrumBlocks[i].transform.position = Vector3.Lerp (spectrumBlocks[i].transform.position, new Vector3 (spectrumBlocks[i].transform.position.x, 1f + 0.04f * i + Mathf.Log (currentSpectrumData[i]*i), spectrumBlocks[i].transform.position.z), 8f * Time.deltaTime);
 
 				// change y-scale according to spectrum data
-				//spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*currentSpectrumData[i]*i*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i) ), 9f * Time.deltaTime);
+				spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*currentSpectrumData[i]*i*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i) ), 9f * Time.deltaTime);
 
 				//spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*currentSpectrumData[i]*Mathf.Log(currentSpectrumData[i]/i) ), 10f * Time.deltaTime);
 			
