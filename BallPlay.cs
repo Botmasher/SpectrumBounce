@@ -30,7 +30,6 @@ public class BallPlay : MonoBehaviour {
 		// add a bumper to world if clicked on free space
 		// check for player, enemies, and other barriers to placement
 		if (Input.GetButtonDown ("Fire1") && bumpersDeployed < numberOfBumpers) {
-			//if (!GameManager.IsCloseToPlayers(Camera.main.ScreenToWorldPoint(Input.mousePosition), 1.5f)) {
 			if (GameManager.ClickedSpotHasObjects()) {
 				Instantiate (bumper, Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z)), Quaternion.identity);
 			}
@@ -43,7 +42,8 @@ public class BallPlay : MonoBehaviour {
 		// play a hit sound
 		GetComponent<AudioSource>().clip = ballHit;
 		GetComponent<AudioSource>().Play ();
-		// possibly add sidespin if collide with the spectrum
+
+		// add sidespin if collide with the spectrum
 		//if (collision.collider.gameObject.tag == spectrumBlockTag) {
 		//	AddRandomSideSpin ();
 		//}

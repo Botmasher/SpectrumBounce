@@ -26,6 +26,7 @@ public class MusicManager : MonoBehaviour {
 	public UnityEngine.UI.Text songTimerText;
 	private float songTimer = 0f;					// how long since song started - will get compared to the clip length
 	private float songLeft = 0f;					// how much time left in song
+	private float songLength;
 
 
 	void Start () {
@@ -51,6 +52,7 @@ public class MusicManager : MonoBehaviour {
 		song = playlist[0];
 		GetComponent<AudioSource> ().clip = song;
 		GetComponent<AudioSource> ().Play ();
+		songLength = GetComponent<AudioSource> ().clip.length;
 
 		// disable first and last blocks, since right now they just get 0 from spectrumData
 		spectrumBlocks[spectrumBlocks.Count-1].SetActive (false);
@@ -64,13 +66,18 @@ public class MusicManager : MonoBehaviour {
 		mixer.GetFloat ("MusicPitch", out songPitch);
 
 		// calculate time remaining, factoring in how the pitch/tempo fx distort the time remaining
-		songLeft = (GetComponent<AudioSource>().clip.length - songTimer) / songPitch;
+		songLeft = (songLength - songTimer)*songPitch >= 0f ? (songLength - songTimer) * songPitch : 0.0001f;
 
-		// Update the UI
+		// Update UI text with formatted song timer countdown
 		string newText = System.TimeSpan.FromSeconds(songLeft).ToString();
-		newText = newText.Substring(newText.IndexOf(":")+1, newText.LastIndexOf(".")-3);
-		songTimerText.text = newText;
-		//songTimerText.text = System.TimeSpan.FromSeconds(songLeft).ToString().Replace(".",":").Substring(3,5);
+		if (newText == "00:00:00") {
+			songTimerText.text = "00:00";
+		} else if (newText.Length < 10) {
+			// we ran into a length calculation error - do not update the text this frame!
+		} else {
+			songTimerText.text = newText.Substring(newText.IndexOf(":")+1, newText.LastIndexOf(".")-3);
+		}
+
 		// make some UI changes during last minute of song
 		if (songLeft < 50f) {
 			songTimerText.color = Color.Lerp (songTimerText.color, Color.red, Time.deltaTime);
@@ -102,14 +109,16 @@ public class MusicManager : MonoBehaviour {
 			if (GetComponent<AudioSource>().isPlaying) {
 
 				// change position according to spectrum data
-				//spectrumBlocks[i].transform.position = Vector3.Lerp (spectrumBlocks[i].transform.position, new Vector3 (spectrumBlocks[i].transform.position.x, 1f + 0.04f * i + Mathf.Log (currentSpectrumData[i]*i), spectrumBlocks[i].transform.position.z), 8f * Time.deltaTime);
+				spectrumBlocks[i].transform.position = Vector3.Lerp (spectrumBlocks[i].transform.position, new Vector3 (spectrumBlocks[i].transform.position.x, 1f + 0.04f * i + Mathf.Log (currentSpectrumData[i]*i), spectrumBlocks[i].transform.position.z), 8f * Time.deltaTime);
 
 				// change y-scale according to spectrum data
-				spectrumBlocks[i].transform.localScale = Vector3.Lerp (spectrumBlocks[i].transform.localScale, new Vector3 (spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*currentSpectrumData[i]*(i+i)*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i),spectrumBlocks[i].transform.localScale.z), 8f * Time.deltaTime);
+				//spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*currentSpectrumData[i]*i*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i) ), 9f * Time.deltaTime);
+
+				//spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*currentSpectrumData[i]*Mathf.Log(currentSpectrumData[i]/i) ), 10f * Time.deltaTime);
 			
 			// slowly stop moving objects if no music is playing
 			} else {
-				spectrumBlocks[i].transform.localScale = Vector3.Lerp (spectrumBlocks[i].transform.localScale, Vector3.one, Time.deltaTime);
+				//spectrumBlocks[i].transform.localScale = Vector3.Lerp (spectrumBlocks[i].transform.localScale, Vector3.one, Time.deltaTime);
 			}
 		}
 	}
