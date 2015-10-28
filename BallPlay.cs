@@ -14,6 +14,10 @@ public class BallPlay : MonoBehaviour {
 	public static int bumpersDeployed;	// count of bumpers in the world
 	public GameObject bumper;			// ball bumper that stays in world for limited time
 
+	public float timeBetweenNudges;		// how often player can apply a nudge force
+	public float nudgeForce;			// how much the nudge nudges
+	private float nudgeCountup;			// counter for counting up to next nudge
+
 	// UI elements
 	public Text itemsText;
 	
@@ -33,6 +37,12 @@ public class BallPlay : MonoBehaviour {
 			if (!GameManager.ThisSpotHasObjects(Camera.main.ScreenToWorldPoint(Input.mousePosition))) {
 				Instantiate (bumper, Camera.main.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, -Camera.main.transform.position.z)), Quaternion.identity);
 			}
+		}
+
+		// 
+		nudgeCountup += Time.deltaTime;
+		if (Input.GetButtonDown ("Fire2") && nudgeCountup >= timeBetweenNudges) {
+			NudgePlayer();
 		}
 	
 	}
@@ -55,5 +65,9 @@ public class BallPlay : MonoBehaviour {
 		this.GetComponent<Rigidbody2D>().AddForce (new Vector2 (Random.Range (-4f, 4f), 0f));
 	}
 
+	void NudgePlayer () {
+		GetComponent<Rigidbody2D> ().AddForce (Vector2.up * nudgeForce);
+		nudgeCountup = 0f;
+	}
 
 }

@@ -30,6 +30,11 @@ public class BumperBoard : MonoBehaviour {
 			// count up to bumper spawn time
 			spawnCountup += Time.deltaTime;
 		}
+
+		if (MusicManager.almostOver) {
+			spawnFrequency = 4f;
+		}
+
 	}
 
 

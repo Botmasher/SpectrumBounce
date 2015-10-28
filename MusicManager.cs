@@ -18,6 +18,9 @@ public class MusicManager : MonoBehaviour {
 	private float[] currentSpectrumData;			// array to hold spectrum data for current frame
 	private float songPitch;						// used to get pitch of the song this frame
 
+	// for notifying everyone else what's going on with the song
+	public static bool almostOver=false;
+
 	// music to play through mixer
 	public List<AudioClip> playlist = new List<AudioClip>();
 	private AudioClip song;							// current music playing
@@ -80,6 +83,8 @@ public class MusicManager : MonoBehaviour {
 
 		// make some UI changes during last minute of song
 		if (songLeft < 50f) {
+			// static bool that song is almost over
+			almostOver = true;
 			songTimerText.color = Color.Lerp (songTimerText.color, Color.red, Time.deltaTime);
 		}
 
@@ -90,8 +95,10 @@ public class MusicManager : MonoBehaviour {
 		if (Input.GetButtonDown ("Jump")) {
 			// reset time since song started
 			songTimer = 0f;
+			// adjust audiosource for this song
 			GetComponent<AudioSource> ().clip = playlist[Random.Range(0, playlist.Count)];
 			GetComponent<AudioSource> ().Play ();
+			songLength = GetComponent<AudioSource> ().clip.length;
 		}
 	}
 
