@@ -9,7 +9,7 @@ public class BallPlay : MonoBehaviour {
 	// sfx to play
 	public AudioClip ballHit;
 
-	// item placement on input
+	// actions or items on input
 	public int numberOfBumpers;			// total bumpers the player has
 	public static int bumpersDeployed;	// count of bumpers in the world
 	public GameObject bumper;			// ball bumper that stays in world for limited time
@@ -18,9 +18,15 @@ public class BallPlay : MonoBehaviour {
 	public float nudgeForce;			// how much the nudge nudges
 	private float nudgeCountup;			// counter for counting up to next nudge
 
+	private Vector2 axes;				// for storing horizontal and vertical input axes
+
 	// UI elements
 	public Text itemsText;
-	
+
+	void Start () {
+		// initialize 
+		axes = Vector2.zero;
+	}
 
 	void Update () {
 		// update UI text
@@ -39,10 +45,13 @@ public class BallPlay : MonoBehaviour {
 			}
 		}
 
-		// 
 		nudgeCountup += Time.deltaTime;
-		if (Input.GetButtonDown ("Fire2") && nudgeCountup >= timeBetweenNudges) {
-			NudgePlayer();
+
+		if (nudgeCountup >= timeBetweenNudges) {
+			axes = new Vector2 (Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+			if (axes != Vector2.zero) {
+				StartCoroutine (NudgePlayer());
+			}
 		}
 	
 	}
@@ -65,9 +74,26 @@ public class BallPlay : MonoBehaviour {
 		this.GetComponent<Rigidbody2D>().AddForce (new Vector2 (Random.Range (-4f, 4f), 0f));
 	}
 
-	void NudgePlayer () {
-		GetComponent<Rigidbody2D> ().AddForce (Vector2.up * nudgeForce);
+	IEnumerator NudgePlayer () {
+		// reset cooldown counter so player doesn't access again
 		nudgeCountup = 0f;
+
+		//GetComponent<Rigidbody2D> ().AddForce (axes * nudgeForce);
+
+		/*while (axes != Vector2.zero) {
+			GetComponent<Rigidbody2D> ().AddForce (axes * nudgeForce);
+			axes = Vector2.Lerp (axes, Vector2.zero, Time.deltaTime);
+			yield return new WaitForEndOfFrame();
+		}*/
+
+		while () {
+			transform.Translate (Vector2.Lerp (, new Vector2(transform.position.x + axes.x, transform.position.y + axes.y), Time.deltaTime);
+			yield return new WaitForEndOfFrame ();
+		}
+		// reinforce the reset
+		nudgeCountup=0f;
+
+		yield return null;
 	}
 
 }

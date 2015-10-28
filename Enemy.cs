@@ -13,7 +13,7 @@ public class Enemy : MonoBehaviour {
 		// flip coin for facing left right
 		movingRight = Mathf.Round (Random.Range (0f,1f)) == 1 ? true : false;
 
-		// play bird sound
+		// play enemy sound
 		GetComponent<AudioSource>().clip = birdScreech;
 		GetComponent<AudioSource>().Play();
 
@@ -46,5 +46,5 @@ public class Enemy : MonoBehaviour {
 			Destroy (this.gameObject);
 		}
 	}
-	
+
 }
