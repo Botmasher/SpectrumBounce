@@ -29,7 +29,8 @@ public class Enemy : MonoBehaviour {
 
 	void Update() {
 		// move linearly over time
-		this.transform.Translate (Vector3.left * speed * Time.deltaTime);
+		this.transform.Translate (Vector2.right * -1f * speed * Time.deltaTime);
+		this.transform.position = new Vector3(this.transform.position.x, this.transform.position.y, 0f);
 
 		// self destruct if exits screen
 		if (movingRight && this.transform.position.x > Camera.main.ViewportToWorldPoint(Vector3.one).x) {

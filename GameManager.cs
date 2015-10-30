@@ -6,13 +6,12 @@ public class GameManager : MonoBehaviour {
 
 	// objects referenced in script
 	public GameObject ball;			// main player bouncing ball
-	public GameObject enemy;		// main grunt enemy
 	public GameObject explosion;	// particle system to instantiate on hits
 	private CameraCrew director;	// crew instance for directing camera and lighting
 
 	// gamewide control flow
 	public static bool gameOver;
-	private bool enemySpawned;
+	public static bool youWin;
 
 	// UI updates
 	public Image screenFader;
@@ -46,7 +45,7 @@ public class GameManager : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		gameOver = false;
-		enemySpawned = false;
+		youWin = false;
 		director = new CameraCrew ();
 
 		// make UI screen invisible
@@ -67,20 +66,13 @@ public class GameManager : MonoBehaviour {
 			centerText.CrossFadeAlpha (1f, 2f, false);
 		}
 
-		// decide if time for enemy to spawn
-		if (!enemySpawned) {
-			StartCoroutine (SpawnEnemy ());
+		if (youWin) {
+			// win text screen fade
+			screenFader.CrossFadeAlpha (1f, 2f, false);
+			centerText.text = "You WIN!";
+			centerText.CrossFadeAlpha (1f, 2f, false);
 		}
 
-	}
-
-	// instantiate an enemy
-	IEnumerator SpawnEnemy () {
-		enemySpawned = true;
-		yield return new WaitForSeconds (Random.Range (6f, 11f));
-		// spawn enemy just offscreen x and at a y that can attack player
-		Instantiate (enemy, new Vector3 (Camera.main.ViewportToWorldPoint(Vector3.one).x, Random.Range(-0.5f,6.0f), 0f), Quaternion.identity);
-		enemySpawned = false;
 	}
 
 	// do scary things when player dies
@@ -101,8 +93,15 @@ public class GameManager : MonoBehaviour {
 
 	// do fun things when player wins
 	public IEnumerator YouWin () {
-		Debug.Log ("You Win!");
+		youWin = true;
+		ball.GetComponent<Rigidbody2D>().isKinematic = true;
+		for (int i=0; i<GameObject.FindGameObjectsWithTag("Enemy").Length; i++) {
+			Instantiate (explosion, GameObject.FindGameObjectsWithTag("Enemy")[i].transform.position, Quaternion.identity);
+			Destroy (GameObject.FindGameObjectsWithTag("Enemy")[i]);
+		}
 		yield return null;
+		yield return new WaitForSeconds (5f);
+		Application.LoadLevel (Application.loadedLevel);
 	}
 	
 	/**

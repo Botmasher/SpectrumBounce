@@ -5,11 +5,14 @@ using System.Collections;
 public class WorldOverseer : MonoBehaviour {
 	
 	// objects referenced in script
-	public GameObject ball;			// main player bouncing ball
 	public GameObject enemy;		// main grunt enemy
 	public GameObject explosion;	// particle system to instantiate on hits
 	private CameraCrew director;	// crew instance for directing camera and lighting
-	
+
+	// test objects to instantiate
+	public GameObject asteroidEnemy;
+	public GameObject heartItem;
+
 	// gamewide control flow
 	public static bool gameOver;
 	private bool enemySpawned;
@@ -52,6 +55,10 @@ public class WorldOverseer : MonoBehaviour {
 		// make UI screen invisible
 		screenFader.CrossFadeAlpha (0f, 1f, false);
 		centerText.CrossFadeAlpha (0f, 0f, true);
+
+		// test spawn item and enemy
+		StartCoroutine ("SpawnAsteroid");
+		StartCoroutine ("SpawnHeart");
 	}
 	
 	void Update () {
@@ -79,19 +86,21 @@ public class WorldOverseer : MonoBehaviour {
 		enemySpawned = true;
 		yield return new WaitForSeconds (Random.Range (6f, 11f));
 		// spawn enemy just offscreen x and at a y that can attack player
-		Instantiate (enemy, new Vector3 (Camera.main.ViewportToWorldPoint(Vector3.one).x, Random.Range(-0.5f,6.0f), 0f), Quaternion.identity);
+		float rand = Random.Range (0f,1f) > 0.5f ? 1f : -1f;
+		Instantiate (enemy, new Vector3 (Camera.main.ViewportToWorldPoint(Vector3.one).x, Random.Range(4f*rand, 5f*rand), 0f), Quaternion.identity);
 		enemySpawned = false;
 	}
 	
 	// do scary things when player dies
-	public IEnumerator OnPlayerDead (GameObject killer, GameObject player) {
+	public IEnumerator OnPlayerDead (GameObject player) {
+		Debug.Log ("I did indeed die!");
 		// tell update to perform gameover actions over time
 		gameOver = true;
 		Instantiate (explosion, player.transform.position, Quaternion.identity);
 		
 		// turn off the player
-		player.GetComponent<Collider2D>().enabled = false;
-		player.GetComponent<SpriteRenderer>().enabled = false;
+		player.GetComponentInChildren<Collider2D>().enabled = false;
+		player.GetComponentInChildren<SpriteRenderer>().enabled = false;
 		
 		// wait and reset level (fade scene and music actions happen in update)
 		yield return new WaitForSeconds (3f);
@@ -116,6 +125,21 @@ public class WorldOverseer : MonoBehaviour {
 		} else {
 			return false;
 		}
+	}
+
+	IEnumerator SpawnAsteroid () {
+		yield return new WaitForSeconds (Random.Range (3f,8f));
+		float rand = Random.Range (0f,1f)>0.5f ? 1 : -1;
+		Instantiate (asteroidEnemy, new Vector3(Random.Range(4f*rand,10f*rand), 10f, 0f), Quaternion.Euler(new Vector3(Random.Range(0,270), Random.Range(0,360), Random.Range(0,360))));
+		StartCoroutine (SpawnAsteroid());
+		yield return null;
+	}
+
+	IEnumerator SpawnHeart () {
+		yield return new WaitForSeconds (Random.Range (8f, 15f));
+		Instantiate (heartItem, Vector3.zero, heartItem.transform.rotation);
+		StartCoroutine (SpawnHeart());
+		yield return null;
 	}
 	
 }

@@ -20,6 +20,11 @@ public class WorldMusic : MonoBehaviour {
 	private float songVolume;						// used to get volume of the song this frame
 	public static float spectrumAvg;				// the average of all spectrum data this frame
 
+	// the health of the music object
+	public AudioClip hurtSound;
+	public static int health;
+	public UnityEngine.UI.Text healthText;
+
 	// for notifying everyone else what's going on with the song
 	public static bool almostOver=false;
 	
@@ -35,6 +40,9 @@ public class WorldMusic : MonoBehaviour {
 	
 	
 	void Start () {
+		// reset music's game stats
+		health = 3;
+
 		// reset the music and UI to basic look and sound
 		mixer.SetFloat ("MusicPitch", 1f);
 		songTimerText.color = Color.yellow;
@@ -67,6 +75,7 @@ public class WorldMusic : MonoBehaviour {
 	
 	
 	void Update () {
+
 		// make current music calculations
 		songTimer += Time.deltaTime;
 		mixer.GetFloat ("MusicPitch", out songPitch);
@@ -105,11 +114,27 @@ public class WorldMusic : MonoBehaviour {
 			songLength = GetComponent<AudioSource> ().clip.length;
 		}
 
-		//if (Input.GetAxis ("Horizontal") != 0f) {
-		//	transform.Rotate (Vector3.forward * Input.GetAxis ("Horizontal") * 100f * Time.deltaTime);
+		// check and display health
+		if (health == 0) {
+			health = -1;
+			StartCoroutine(Camera.main.GetComponent<WorldOverseer>().OnPlayerDead (this.gameObject));
+		}
+		healthText.text = "Current health: "+health;
+
+
+		/**
+		 * make movements on input, and settle back into defaults when inputs are let up
+		 */
+		// rotate spectrum with input
 		if (Input.GetAxis ("Horizontal") != 0f) {
-			transform.localScale = Vector2.Lerp (transform.localScale, new Vector2 (Mathf.Clamp(transform.localScale.x + Input.GetAxis ("Horizontal"),0.2f, 1.5f), transform.localScale.y), 3f*Time.deltaTime);
-			mixer.SetFloat("MusicVolume", Mathf.Lerp (songVolume, 0f, 3f * Time.deltaTime));
+			transform.Rotate (Vector3.forward * Input.GetAxis ("Horizontal") * 100f * Time.deltaTime);
+
+//		// scale spectrum with input
+//		if (Input.GetAxis ("Horizontal") != 0f) {
+//			transform.localScale = Vector2.Lerp (transform.localScale, new Vector2 (Mathf.Clamp(transform.localScale.x + Input.GetAxis ("Horizontal"),0.2f, 1.5f), transform.localScale.y), 3f*Time.deltaTime);
+//			mixer.SetFloat("MusicVolume", Mathf.Lerp (songVolume, 0f, 3f * Time.deltaTime));
+		
+		// turn up the volume to big those spikes
 		} else if (Input.GetAxis ("Vertical") != 0f) {
 			mixer.SetFloat("MusicVolume", Mathf.Clamp (songVolume+Input.GetAxis("Vertical"), -5f, 3f));
 			transform.localScale = Vector2.Lerp (transform.localScale, Vector2.one, 3f * Time.deltaTime);
@@ -117,6 +142,7 @@ public class WorldMusic : MonoBehaviour {
 			transform.localScale = Vector2.Lerp (transform.localScale, Vector2.one, 3f * Time.deltaTime);
 			mixer.SetFloat("MusicVolume", Mathf.Lerp (songVolume, 0f, 3f * Time.deltaTime));
 		}
+
 	}
 	
 	
@@ -156,6 +182,17 @@ public class WorldMusic : MonoBehaviour {
 		// check for pitch - currently already being done in Update
 		//mixer.GetFloat ("MusicPitch", out songPitch);
 		mixer.SetFloat ("MusicPitch", songPitch - (0.5f*Time.deltaTime));
+	}
+
+
+	public static void TakeOneHealth () {
+		if (health > 0) {
+			health--;
+		}
+	}
+
+	public static void AddOneHealth () {
+		health++;
 	}
 
 }

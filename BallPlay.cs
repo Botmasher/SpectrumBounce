@@ -15,11 +15,10 @@ public class BallPlay : MonoBehaviour {
 	public GameObject bumper;			// ball bumper that stays in world for limited time
 	
 	public float nudgeForce;			// how much the nudge nudges
-	public float nudgeFrequency;		// how often player can apply a nudge force
-	private float nudgeCountup;			// counter for counting up to next nudge
+	public float nudgeCooldown;			// how often player can apply a nudge force
+	private bool canNudge;				// control flow for entering nudge state
 
 	// input axes
-	private float nudgeDir;				// input axes for nudge direction
 	private float horiz;
 	private float vert;
 
@@ -27,7 +26,8 @@ public class BallPlay : MonoBehaviour {
 	public Text itemsText;
 
 	void Start () {
-		bumpersDeployed=0;
+		bumpersDeployed = 0;
+		canNudge = true;
 	}
 
 	void Update () {
@@ -47,16 +47,17 @@ public class BallPlay : MonoBehaviour {
 			}
 		}
 
-
-		// ability to periodically nudge ball along x axis
-		nudgeCountup += Time.deltaTime;
-
-		if (nudgeCountup >= nudgeFrequency) {
-			nudgeDir = Input.GetAxisRaw("Horizontal");
-			if (nudgeDir != 0f) {
-				StartCoroutine (NudgePlayer (nudgeDir, nudgeForce));
+		if (canNudge) {
+			horiz = Input.GetAxisRaw ("Horizontal");
+			vert = Input.GetAxisRaw ("Vertical");
+			if (horiz != 0f) {
+				StartCoroutine (Nudge (horiz, 0f, nudgeForce));
+			} else if (vert != 0f) {
+				StartCoroutine (Nudge (0f, vert, nudgeForce));
 			}
 		}
+
+
 
 //		// input to nudge ball sideways
 //		horiz = Input.GetAxis ("Horizontal");
@@ -91,16 +92,11 @@ public class BallPlay : MonoBehaviour {
 	}
 
 
-
-	IEnumerator NudgePlayer (float Xdir, float force) {
-
-		GetComponent<Rigidbody2D> ().AddForce (Vector2.right * Xdir * force);
-
-		yield return new WaitForSeconds (0.1f);
-
-		nudgeCountup = 0f;
-
-		yield return null;
+	IEnumerator Nudge (float Xdir, float Ydir, float force){
+		canNudge = false;
+		GetComponent<Rigidbody2D>().AddForce (new Vector2(Xdir,Ydir) * 8f * force);
+		yield return new WaitForSeconds (nudgeCooldown);
+		canNudge = true;
 	}
 
 }
