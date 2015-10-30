@@ -40,9 +40,9 @@ public class Enemy : MonoBehaviour {
 
 	}
 
+	// player deals with death and gameover, but this enemy destroys self during collision with player
 	void OnTriggerEnter2D (Collider2D other) {
 		if (other.gameObject.tag == "Player") {
-			StartCoroutine (Camera.main.GetComponent<GameManager>().OnPlayerDead (this.gameObject, other.gameObject));
 			Destroy (this.gameObject);
 		}
 	}

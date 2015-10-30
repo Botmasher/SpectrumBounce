@@ -41,4 +41,15 @@ public class Bumper : MonoBehaviour {
 		Destroy (this.gameObject);
 	}
 
+	// push player upwards 
+	void OnCollisionEnter2D (Collision2D collision) {
+		if (collision.collider.gameObject.tag == "Player" && collision.contacts[0].point.y > this.transform.position.y) {
+			// check that player is moving slow enough to add upward force
+			if(Mathf.Abs(collision.collider.GetComponent<Rigidbody2D>().velocity.y) < 10f)
+			{
+				collision.collider.GetComponent<Rigidbody2D> ().AddForce (Vector2.up * 60f);
+			}
+		}
+	}
+
 }
