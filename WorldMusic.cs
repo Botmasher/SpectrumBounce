@@ -129,12 +129,12 @@ public class WorldMusic : MonoBehaviour {
 		if (Input.GetAxis ("Horizontal") != 0f) {
 			transform.Rotate (Vector3.forward * Input.GetAxis ("Horizontal") * 100f * Time.deltaTime);
 
-//		// scale spectrum with input
+		// scale spectrum with input
 //		if (Input.GetAxis ("Horizontal") != 0f) {
 //			transform.localScale = Vector2.Lerp (transform.localScale, new Vector2 (Mathf.Clamp(transform.localScale.x + Input.GetAxis ("Horizontal"),0.2f, 1.5f), transform.localScale.y), 3f*Time.deltaTime);
-//			mixer.SetFloat("MusicVolume", Mathf.Lerp (songVolume, 0f, 3f * Time.deltaTime));
+//			mixer.SetFloat("MusicVolume", Mathf.Lerp (songVolume, 0f, 5f * Time.deltaTime));
 		
-		// turn up the volume to big those spikes
+		// change the volume for up and down spikes
 		} else if (Input.GetAxis ("Vertical") != 0f) {
 			mixer.SetFloat("MusicVolume", Mathf.Clamp (songVolume+Input.GetAxis("Vertical"), -5f, 3f));
 			transform.localScale = Vector2.Lerp (transform.localScale, Vector2.one, 3f * Time.deltaTime);

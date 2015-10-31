@@ -15,7 +15,7 @@ public class MusicManager : MonoBehaviour {
 	public AudioMixerGroup masterTrack;				// all channels
 	public AudioMixerGroup musicTrack;				// music channels
 	[Range (64, 8192)] public int numSamples;		// break spectrum data into n sample slices (spectrumdata allows min=64,max=8192)
-	private float[] currentSpectrumData;			// array to hold spectrum data for current frame
+	public static float[] currentSpectrumData;		// array to hold spectrum data for current frame
 	private float songPitch;						// used to get pitch of the song this frame
 	private float songVolume;						// used to get volume of the song this frame
 	private float songDistortion;					// used to get distortion level of the song this frame
@@ -89,7 +89,7 @@ public class MusicManager : MonoBehaviour {
 		}
 
 		// make some UI changes during last minute of song
-		if (songLeft < 60f) {
+		if (songLeft < 55f) {
 			// static bool that song is almost over
 			almostOver = true;
 			songTimerText.color = Color.Lerp (songTimerText.color, Color.red, Time.deltaTime);
@@ -157,6 +157,7 @@ public class MusicManager : MonoBehaviour {
 			} else {
 				//spectrumBlocks[i].transform.localScale = Vector3.Lerp (spectrumBlocks[i].transform.localScale, Vector3.one, Time.deltaTime);
 			}
+
 		}
 	}
 
