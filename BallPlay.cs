@@ -49,12 +49,13 @@ public class BallPlay : MonoBehaviour {
 
 		if (canNudge) {
 			horiz = Input.GetAxisRaw ("Horizontal");
-			vert = Input.GetAxisRaw ("Vertical");
+//			vert = Input.GetAxisRaw ("Vertical");
 			if (horiz != 0f) {
 				StartCoroutine (Nudge (horiz, 0f, nudgeForce));
-			} else if (vert != 0f) {
-				StartCoroutine (Nudge (0f, vert, nudgeForce));
 			}
+//			else if (vert != 0f) {
+//				StartCoroutine (Nudge (0f, vert, nudgeForce));
+//			}
 		}
 
 

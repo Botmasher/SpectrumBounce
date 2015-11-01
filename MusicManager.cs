@@ -109,11 +109,11 @@ public class MusicManager : MonoBehaviour {
 		}
 
 		// allow y input to change volume
-//		if (Input.GetAxis ("Vertical") != 0f) {
-//			mixer.SetFloat ("MusicVolume", Mathf.Lerp(songVolume, Mathf.Clamp(songVolume+Input.GetAxis("Vertical"), -3f, 3f), 6f*Time.deltaTime));
-//		} else {
-//			mixer.SetFloat ("MusicVolume", Mathf.Lerp(songVolume, 0f, 6f*Time.deltaTime));
-//		}
+		if (Input.GetAxis ("Vertical") != 0f) {
+			mixer.SetFloat ("MusicVolume", Mathf.Lerp(songVolume, Mathf.Clamp(songVolume+Input.GetAxis("Vertical"), -3f, 3f), 6f*Time.deltaTime));
+		} else {
+			mixer.SetFloat ("MusicVolume", Mathf.Lerp(songVolume, 0f, 6f*Time.deltaTime));
+		}
 
 	}
 	
@@ -123,7 +123,7 @@ public class MusicManager : MonoBehaviour {
 	 */
 	void MoveSpectrumWithMusic () {
 		// grab the spectrum data for this component's track
-		currentSpectrumData = GetComponent<AudioSource> ().GetSpectrumData (numSamples, 0, FFTWindow.Blackman);
+		currentSpectrumData = GetComponent<AudioSource>().GetSpectrumData (numSamples, 0, FFTWindow.Blackman);
 		//currentSpectrumData = GetComponent<AudioSource> ().GetOutputData(numSamples, 0);
 
 		// go through each spectrum slice and move a corresponding object

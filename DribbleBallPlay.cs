@@ -47,14 +47,16 @@ public class DribbleBallPlay : MonoBehaviour {
 		}
 		
 		if (canNudge) {
-			vert = Input.GetAxisRaw ("Vertical");
-			if (vert != 0f) {
-				StartCoroutine (Nudge (vert, nudgeForce));
+			vert = Input.GetAxis ("Vertical");
+			if (vert<0f) {
+				StartCoroutine (Nudge (nudgeForce));
 			}
 		}
 
+
 		horiz = Input.GetAxisRaw("Horizontal");
-		if (horiz!=0f) {
+		if (horiz != 0f) {
+			//transform.Translate(Vector2.right * horiz*10f*Time.deltaTime);
 			GetComponent<Rigidbody2D>().AddForce(Vector2.right*horiz*speed*Time.deltaTime);
 		}
 		
@@ -80,9 +82,9 @@ public class DribbleBallPlay : MonoBehaviour {
 	}
 	
 	
-	IEnumerator Nudge (float Ydir, float force){
+	IEnumerator Nudge (float force){
 		canNudge = false;
-		GetComponent<Rigidbody2D>().AddForce (new Vector2(0f,Ydir) * 8f * force);
+		GetComponent<Rigidbody2D>().AddForce (Vector2.up * -1f * force);
 		yield return new WaitForSeconds (nudgeCooldown);
 		canNudge = true;
 	}
