@@ -7,8 +7,9 @@ public class Paddle : MonoBehaviour {
 	// objects to use
 	public GameObject backgroundImage;
 	public List<GameObject> enemies = new List<GameObject>();
+	public GameObject healthPickup;
 	public GameObject explosion;
-
+	
 	// player movement
 	public float moveSpeed;
 	private float horiz;
@@ -30,8 +31,9 @@ public class Paddle : MonoBehaviour {
 		initScale = this.transform.localScale;
 		backgroundInitScale = backgroundImage.transform.localScale;
 
-		// start periodically spawning enemies
+		// start periodically spawning enemies and pickups
 		StartCoroutine (SpawnEnemies());
+		StartCoroutine (SpawnPickups());
 	}
 
 
@@ -51,10 +53,12 @@ public class Paddle : MonoBehaviour {
 	}
 
 
+	// check for collision with following objects
 	void OnCollisionEnter2D (Collision2D other) {
-		if (other.collider.gameObject.tag == "Enemy") {
+		if (other.collider.gameObject.tag == "Enemy" || other.collider.gameObject.tag == "Pickup") {
 			Destroy (other.collider.gameObject);
 			Instantiate (explosion, other.collider.transform.position, Quaternion.identity);
+			// add to static game score
 			score ++;
 		}
 	}
@@ -74,8 +78,13 @@ public class Paddle : MonoBehaviour {
 		}
 	}
 
+
+	/**
+	 * 	Spawn enemies and pickups over time
+	 */
+
 	IEnumerator SpawnEnemies () {
-		yield return new WaitForSeconds (Random.Range (0.2f,1f));
+		yield return new WaitForSeconds (Random.Range (0.6f,1.5f));
 		Instantiate ( enemies[Random.Range(0,enemies.Count)], new Vector3 ( Random.Range(6f,-6f), 6f, 0f), Quaternion.Euler(new Vector3 (0f,0f, Random.Range (0f, 270f)) ) );
 		if (!gameOver) {
 			StartCoroutine (SpawnEnemies());
@@ -83,4 +92,13 @@ public class Paddle : MonoBehaviour {
 		yield return null;
 	}
 
+	IEnumerator SpawnPickups () {
+		yield return new WaitForSeconds (Random.Range (2f,4f));
+		Instantiate ( healthPickup, new Vector3 ( Random.Range(6f,-6f), 6f, 0f), Quaternion.Euler(new Vector3 (0f,0f, Random.Range (0f, 270f)) ) );
+		if (!gameOver) {
+			StartCoroutine (SpawnPickups());
+		}
+		yield return null;
+	}
+	
 }

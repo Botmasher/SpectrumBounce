@@ -184,6 +184,17 @@ public class PaddleTestMusicManager : MonoBehaviour {
 		mixer.SetFloat ("MusicPitch", songPitch - (0.5f*Time.deltaTime));
 	}
 
+
+	// music slowly goes up in pitch
+	public void PitchUp () {
+		// check for pitch - currently already being done in Update
+		//mixer.GetFloat ("MusicPitch", out songPitch);
+		if (songPitch < 1.5f) {
+			mixer.SetFloat ("MusicPitch", songPitch + (0.5f*Time.deltaTime));
+		}
+	}
+
+
 	// music gets distorted - called by levelmanager and boss scripts
 	public void DistortionUp () {
 		mixer.SetFloat ("MusicDistortion", Mathf.Lerp (songDistortion, 0.8f, 2f*Time.deltaTime));
