@@ -3,7 +3,7 @@ using UnityEngine.Audio;
 using System.Collections;
 using System.Collections.Generic;
 
-public class MusicManager : MonoBehaviour {
+public class PaddleTestMusicManager : MonoBehaviour {
 
 	// for lining up objects and moving them with spectrum while playing song
 	public GameObject spectrumBlock;
@@ -16,9 +16,9 @@ public class MusicManager : MonoBehaviour {
 	public AudioMixerGroup musicTrack;				// music channels
 	[Range (64, 8192)] public int numSamples;		// break spectrum data into n sample slices (spectrumdata allows min=64,max=8192)
 	public static float[] currentSpectrumData;		// array to hold spectrum data for current frame
-	private float songPitch;						// used to get pitch of the song this frame
-	private float songVolume;						// used to get volume of the song this frame
-	private float songDistortion;					// used to get distortion level of the song this frame
+	public static float songPitch;					// used to get pitch of the song this frame
+	public static float songVolume;					// used to get volume of the song this frame
+	public static float songDistortion;				// used to get distortion level of the song this frame
 
 	// for notifying everyone else what's going on with the song
 	public static bool almostOver;
@@ -26,6 +26,12 @@ public class MusicManager : MonoBehaviour {
 	// music to play through mixer
 	public List<AudioClip> playlist = new List<AudioClip>();
 	private AudioClip song;							// current music playing
+
+	// vars for beat tracking algorithm
+	private int beatCounter=0;
+	private bool newBeat=false;
+	float[] historyBuffer = new float[43];
+	public static bool isOnBeat;
 
 	// UI display song stats
 	public UnityEngine.UI.Text songTimerText;
@@ -39,7 +45,6 @@ public class MusicManager : MonoBehaviour {
 		mixer.SetFloat ("MusicPitch", 1f);
 		mixer.SetFloat ("MusicDistortion", 0f);
 		mixer.SetFloat ("MusicVolume", 0f);
-		songTimerText.color = Color.yellow;
 		almostOver = false;
 
 		// ensure samples is an even integer between 64 and 8192 as expected by spectrumdata
@@ -53,7 +58,7 @@ public class MusicManager : MonoBehaviour {
 
 		// lineup blocks in spectrum from origin until placing total number of sample slices
 		for (int i = 0; i < numSamples; i++) {
-			spectrumBlocks.Add (Instantiate (spectrumBlock, new Vector3 (spectrumXOrigin+i*0.2f, -3f, 0f), Quaternion.identity) as GameObject);
+			spectrumBlocks.Add (Instantiate (spectrumBlock, new Vector3 (spectrumXOrigin+i*0.2f, -5f, 0f), Quaternion.identity) as GameObject);
 		}
 
 		// load and play first song
@@ -97,6 +102,8 @@ public class MusicManager : MonoBehaviour {
 
 		// call function to adjust spectrum this frame
 		MoveSpectrumWithMusic ();
+
+		isOnBeat = TrackBeats();
 
 		// allow input to switch up songs
 		if (Input.GetButtonDown ("Fire2")) {
@@ -145,11 +152,11 @@ public class MusicManager : MonoBehaviour {
 
 				// change y-scale according to spectrum data, accounting for volume changes
 				if (songVolume > 0f) {
-					spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*(currentSpectrumData[i]*(1+songVolume))*i*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i) ), 9f * Time.deltaTime);
+					spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.1f + (currentSpectrumData[i]*(1+songVolume))*i*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i) ), 9f * Time.deltaTime);
 				} else if (songVolume < 0f) {
-					spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*(currentSpectrumData[i]/(1+Mathf.Abs(songVolume)))*i*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i) ), 9f * Time.deltaTime);
+					spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.1f + (currentSpectrumData[i]/(1+Mathf.Abs(songVolume)))*i*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i) ), 9f * Time.deltaTime);
 				} else {
-					spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*currentSpectrumData[i]*i*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i) ), 9f * Time.deltaTime);
+					spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.1f + currentSpectrumData[i]*i*Mathf.Log(currentSpectrumData[i]*currentSpectrumData[i]*i*i) ), 9f * Time.deltaTime);
 				}
 				//spectrumBlocks[i].transform.localScale = Vector2.Lerp (spectrumBlocks[i].transform.localScale, new Vector2 ( spectrumBlocks[i].transform.localScale.x, 0.2f + 5f*currentSpectrumData[i]*Mathf.Log(currentSpectrumData[i]/i) ), 10f * Time.deltaTime);
 		
@@ -159,6 +166,15 @@ public class MusicManager : MonoBehaviour {
 			}
 
 		}
+	}
+
+	// average all values in above spectrum array to get wider spectrum snapshot
+	public static float GetSpectrumAverage () {
+		float avg = 0f;
+		for (int i=0; i < currentSpectrumData.Length; i++) {
+			avg += currentSpectrumData[i];
+		}
+		return (avg/currentSpectrumData.Length);
 	}
 
 	// music slowly goes to pitch 0 and kills the tune - the sound of failure
@@ -171,6 +187,110 @@ public class MusicManager : MonoBehaviour {
 	// music gets distorted - called by levelmanager and boss scripts
 	public void DistortionUp () {
 		mixer.SetFloat ("MusicDistortion", Mathf.Lerp (songDistortion, 0.8f, 2f*Time.deltaTime));
+	}
+
+
+	/**
+	 * 	Count the beat by tracking spectrum over time and determining local peak
+	 */
+	public bool TrackBeats () {
+		
+		//compute instant sound energy
+		float[] channelRight = GetComponent<AudioSource>().GetSpectrumData (1024, 1, FFTWindow.Hamming);
+		float[] channelLeft = GetComponent<AudioSource>().GetSpectrumData (1024, 2, FFTWindow.Hamming);
+		
+		float e = sumStereo (channelLeft, channelRight);
+		
+		//compute local average sound evergy
+		float E = sumLocalEnergy ()/historyBuffer.Length; // E being the average local sound energy
+		
+		//calculate variance
+		float sumV = 0;
+		for (int i = 0; i< 43; i++) 
+			sumV += (historyBuffer[i]-E)*(historyBuffer[i]-E);
+		
+		float V = sumV/historyBuffer.Length;
+		float constant = (float)((-0.0025714 * V) + 1.5142857);
+		
+		float[] shiftingHistoryBuffer = new float[historyBuffer.Length]; // make a new array and copy all the values to it
+		
+		for (int i = 0; i<(historyBuffer.Length-1); i++) { // now we shift the array one slot to the right
+			shiftingHistoryBuffer[i+1] = historyBuffer[i]; // and fill the empty slot with the new instant sound energy
+		}
+		
+		shiftingHistoryBuffer [0] = e;
+		
+		for (int i = 0; i<historyBuffer.Length; i++) {
+			historyBuffer[i] = shiftingHistoryBuffer[i]; //then we return the values to the original array
+		}
+		
+		//constant = 1.5f;
+		
+		if (e > (constant * E)) { // now we check if we have a beat
+
+			/**
+			 * added beat-peak and multibeat behavior
+			 */
+			if (newBeat) {
+				beatCounter++;
+				newBeat = false;
+			}
+			if (beatCounter > 0) {
+				beatCounter = 0;
+			}
+			// end added for multibeat
+
+			//  
+			return true;
+
+		} else {
+			// found new beat in multibeat groove
+			newBeat = true;
+
+			return false;
+		}
+		
+		/*
+		Debug.Log ("Avg local: " + E);
+		Debug.Log ("Instant: " + e);
+		Debug.Log ("History Buffer: " + historybuffer());
+		
+		Debug.Log ("sum Variance: " + sumV);
+		Debug.Log ("Variance: " + V);
+		
+		Debug.Log ("Constant: " + constant);
+		Debug.Log ("--------");
+		*/
+		
+	}
+	
+	// auxiliary methods called when determining beat
+
+	float sumStereo(float[] channel1, float[] channel2) {
+		float e = 0;
+		for (int i = 0; i<channel1.Length; i++) {
+			e += ((channel1[i]*channel1[i]) + (channel2[i]*channel2[i]));
+		}
+		
+		return e;
+	}
+	
+	float sumLocalEnergy() {
+		float E = 0;
+		
+		for (int i = 0; i<historyBuffer.Length; i++) {
+			E += historyBuffer[i]*historyBuffer[i];
+		}
+		
+		return E;
+	}
+	
+	string historybuffer() {
+		string s = "";
+		for (int i = 0; i<historyBuffer.Length; i++) {
+			s += (historyBuffer[i] + ",");
+		}
+		return s;
 	}
 
 }

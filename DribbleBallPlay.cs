@@ -31,7 +31,8 @@ public class DribbleBallPlay : MonoBehaviour {
 	
 	void Update () {
 		// update UI text
-		itemsText.text = ("Bumpers Left: "+(numberOfBumpers-bumpersDeployed));
+		itemsText.text = "";
+		//itemsText.text = ("Bumpers Left: "+(numberOfBumpers-bumpersDeployed));
 		
 		// ensure ball always stays along 2D z collision plane
 		if (Mathf.Abs(this.transform.position.z) > 1f) {
