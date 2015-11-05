@@ -8,7 +8,7 @@ public class FirstPMusicManager : MonoBehaviour {
 	// for lining up objects and moving them with spectrum while playing song
 	public GameObject spectrumBlock;
 	public GameObject songManagerEmpty; 			// to instantiate for each song as parent of that song's spectrum
-	
+
 	// for listening to, behaving with and FXing music
 	public AudioMixer mixer;						// main mixer in scene
 	public AudioMixerGroup masterTrack;				// all channels
@@ -19,11 +19,9 @@ public class FirstPMusicManager : MonoBehaviour {
 	private float songVolume;						// used to get volume of the song this frame
 	private float songDistortion;					// used to get distortion level of the song this frame
 	
-	// for notifying everyone else what's going on with the song
-	public static bool almostOver;
-	
-	// music to play through mixer
-	public List<AudioClip> playlist = new List<AudioClip>();
+	// music to play through mixer and visualize in world
+	public List<AudioClip> playlist = new List<AudioClip>();		// input list of music to turn into song objects
+	public List<Vector3> songPositions = new List<Vector3>();		// list of where each song object spectrum will appear in the world
 	private List<Song> songs = new List<Song>();	// all song objects in game right now
 	private Song thisSong;							// current music playing
 
@@ -35,15 +33,16 @@ public class FirstPMusicManager : MonoBehaviour {
 
 
 	/**
-	 *	store information about each song and create an in-world spectrum representation of it 
+	 *	create a song and an in-world spectrum representation of it 
 	 */
 	public class Song {
-		GameObject songManager;
+		public GameObject songManager;
 		AudioClip clip;
 		float[] spectrum;
 		int samples;
 		List<GameObject> spectrumObjects;
 
+		// store info about the song and the in-world object spectrum
 		public Song (AudioClip track, GameObject spectrumBrick, int samplesCount, GameObject audioManager) {
 			clip = track;
 			samples = samplesCount;
@@ -55,25 +54,26 @@ public class FirstPMusicManager : MonoBehaviour {
 
 			// lineup blocks in spectrum from origin until placing total number of sample slices
 			for (int i = 0; i < samples; i++) {
-				spectrumObjects.Add (Instantiate (spectrumBrick, new Vector3 (i*0.2f, 0f, 0f), Quaternion.identity) as GameObject);
+				spectrumObjects.Add (Instantiate (spectrumBrick, new Vector3 (-5f+i*0.2f, 0f, 0f), Quaternion.identity) as GameObject);
 				spectrumObjects[i].transform.parent = songManager.transform;
 			}
 
 			// disable first and last blocks, since right now they just get 0 from spectrumData
-			//spectrumObjects[spectrumObjects.Count-1].SetActive (false);
-			//spectrumObjects[0].SetActive (false);
+			spectrumObjects[spectrumObjects.Count-1].SetActive (false);
+			spectrumObjects[0].SetActive (false);
 		}
 
+		// move spectrum objects along with the music
 		public void UpdateSpectrum () {
 			spectrum = songManager.GetComponent<AudioSource>().GetSpectrumData (samples, 0, FFTWindow.Blackman);
 			// go through each spectrum slice and move a corresponding object
 			for (int i = 1; i < spectrum.Length-1; i++) {
 				if (songManager.GetComponent<AudioSource>().isPlaying) {
 					// change y-scale according to spectrum data, accounting for volume changes
-					spectrumObjects[i].transform.localScale = Vector3.Lerp (spectrumObjects[i].transform.localScale, new Vector3 ( spectrumObjects[i].transform.localScale.x, 0.2f + 5f*spectrum[i]*i*Mathf.Log(spectrum[i]*spectrum[i]*i*i), 1f ), 9f * Time.deltaTime);
+					spectrumObjects[i].transform.localScale = Vector3.Lerp (spectrumObjects[i].transform.localScale, new Vector3 ( spectrumObjects[i].transform.localScale.x, 0.2f + 5f*spectrum[i]*i*Mathf.Log(spectrum[i]*spectrum[i]*i*i), 0.2f ), 9f * Time.deltaTime);
 				// slowly stop moving objects if no music is playing
 				} else {
-					spectrumObjects[i].transform.localScale = Vector3.Lerp (spectrumObjects[i].transform.localScale, Vector3.one, Time.deltaTime);
+					spectrumObjects[i].transform.localScale = Vector3.Lerp (spectrumObjects[i].transform.localScale, new Vector3(0.5f,0.5f,0.2f), Time.deltaTime);
 				}
 			}
 		}
@@ -87,11 +87,12 @@ public class FirstPMusicManager : MonoBehaviour {
 		mixer.SetFloat ("MusicDistortion", 0f);
 		mixer.SetFloat ("MusicVolume", 0f);
 		songTimerText.color = Color.yellow;
-		almostOver = false;
-		
 
-		// load and play first song
-		thisSong = new Song (playlist[0], spectrumBlock, numSamples, songManagerEmpty);
+		// create songs
+		for (int i=0; i<playlist.Count; i++) {
+			songs.Add (new Song(playlist[i], spectrumBlock, numSamples, songManagerEmpty));
+			songs[i].songManager.transform.position = songPositions[i];
+		}
 
 		//GetComponent<AudioSource> ().clip = thisSong;
 		//GetComponent<AudioSource> ().Play ();
@@ -109,24 +110,21 @@ public class FirstPMusicManager : MonoBehaviour {
 		// calculate time remaining, factoring in how the pitch/tempo fx distort the time remaining
 		songLeft = (songLength - songTimer) / songPitch >= 0f ? (songLength - songTimer) / songPitch : 0.0001f;
 		
-		// Update UI text with formatted song timer countdown
-		string newText = System.TimeSpan.FromSeconds(songLeft).ToString();
-		if (newText == "00:00:00") {
-			songTimerText.text = "00:00";
-		} else if (newText.Length < 10) {
-			// we ran into a length calculation error - do not update the text this frame!
-		} else {
-			songTimerText.text = newText.Substring(newText.IndexOf(":")+1, newText.LastIndexOf(".")-3);
+//		// Update UI text with formatted song timer countdown
+//		string newText = System.TimeSpan.FromSeconds(songLeft).ToString();
+//		if (newText == "00:00:00") {
+//			songTimerText.text = "00:00";
+//		} else if (newText.Length < 10) {
+//			// we ran into a length calculation error - do not update the text this frame!
+//		} else {
+//			songTimerText.text = newText.Substring(newText.IndexOf(":")+1, newText.LastIndexOf(".")-3);
+//		}
+		songTimerText.text="";
+
+
+		for (int i=0; i<playlist.Count; i++) {
+			songs[i].UpdateSpectrum();
 		}
-		
-		// make some UI changes during last minute of song
-		if (songLeft < 55f) {
-			// static bool that song is almost over
-			almostOver = true;
-			songTimerText.color = Color.Lerp (songTimerText.color, Color.red, Time.deltaTime);
-		}
-		
-		thisSong.UpdateSpectrum();
 		
 		// allow input to switch up songs
 		if (Input.GetButtonDown ("Fire2")) {
