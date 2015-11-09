@@ -11,10 +11,12 @@ public class TestColorPicker : MonoBehaviour {
 
 	// gameobject to change
 	public GameObject target;
-
+	public UnityEngine.UI.InputField textBox;
+	private Color inputColor;
 
 	// Update is called once per frame
 	void Update () {
+
 		if (Input.GetMouseButton(0)) {
 			// cast ray looking for collider with texture
 			ray = Camera.main.ScreenPointToRay (Input.mousePosition);
@@ -32,7 +34,26 @@ public class TestColorPicker : MonoBehaviour {
 
 				// change color of target object using tex data
 				target.GetComponent<MeshRenderer> ().material.color = pixelColor;
+
+				// update color code in input field
+				textBox.text = Mathf.Round(pixelColor[1]*255).ToString();
+			}
+				
+		}
+
+		// update value to text input if user manually inputs a value integer
+		int colorValue;
+		// check that input text is a valid integer
+		if (int.TryParse(textBox.text, out colorValue)) {
+			// convert color to this grayscale value
+			inputColor = new Color (colorValue, colorValue, colorValue);
+			// change the brush color and target material color
+			if (inputColor != TestColorPaint.brushColor) {
+				TestColorPaint.brushColor = inputColor;
+				target.GetComponent<MeshRenderer> ().material.color = inputColor;
 			}
 		}
+
 	}
+
 }
