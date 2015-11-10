@@ -9,12 +9,12 @@ public class TestColorPicker : MonoBehaviour {
 	Texture2D tex;
 	Color pixelColor;
 
-	// gameobject to change
+	// gameobjects to change
 	public GameObject target;
 	public UnityEngine.UI.InputField textBox;
 	private Color inputColor;
 
-	// Update is called once per frame
+
 	void Update () {
 
 		if (Input.GetMouseButton(0)) {

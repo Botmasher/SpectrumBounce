@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class TestColorPaint : MonoBehaviour {
 
@@ -13,8 +14,18 @@ public class TestColorPaint : MonoBehaviour {
 	RaycastHit hit;
 	Texture2D tex;
 
+	// display text to user
+	public UnityEngine.UI.Text screenText;
+	
+	// circles for AI to paint
+	public List<GameObject> paintTargets = new List<GameObject>();
+
 
 	void Start () {
+		// set up AI color picking
+		StartCoroutine ( PaintRandomValue (0) );
+		screenText.text = "";
+
 		// initial brush state
 		brushColor = Color.black;
 		brushSize = (int)(size*0.5f);
@@ -50,6 +61,23 @@ public class TestColorPaint : MonoBehaviour {
 
 		}
 
+	}
+
+
+	IEnumerator PaintRandomValue (int index) {
+		yield return new WaitForSeconds (1f);
+		screenText.text = "Choosing a color";
+		yield return new WaitForSeconds (3f);
+		screenText.text = "";
+		
+		float thisValue = Random.Range (0f, 1f);
+		paintTargets[index].GetComponent<MeshRenderer>().material.color = new Color (thisValue, thisValue, thisValue);
+
+		index ++;
+		if (index < paintTargets.Count) {
+			StartCoroutine (PaintRandomValue (index));
+		}
+		yield return null;
 	}
 
 }
